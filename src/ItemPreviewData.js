@@ -21,7 +21,7 @@ class ItemPreviewData {
    * @param {number}  [opts.paintIndex=0]
    * @param {number}  [opts.rarity=0]
    * @param {number}  [opts.quality=0]
-   * @param {number}  [opts.paintWear=0.0]
+   * @param {number|null} [opts.paintWear=null]
    * @param {number}  [opts.paintSeed=0]
    * @param {number}  [opts.killEaterScoreType=0]
    * @param {number}  [opts.killEaterValue=0]
@@ -43,7 +43,7 @@ class ItemPreviewData {
     paintIndex = 0,
     rarity = 0,
     quality = 0,
-    paintWear = 0.0,
+    paintWear = null,
     paintSeed = 0,
     killEaterScoreType = 0,
     killEaterValue = 0,

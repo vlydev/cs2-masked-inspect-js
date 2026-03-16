@@ -134,6 +134,7 @@ function encodeSticker(s) {
   if (s.offsetY  !== null) w.writeFloat32Fixed(8, s.offsetY);
   if (s.offsetZ  !== null) w.writeFloat32Fixed(9, s.offsetZ);
   w.writeUint32(10, s.pattern);
+  if (s.highlightReel != null) w.writeUint32(11, s.highlightReel);
   return w.toBytes();
 }
 
@@ -153,7 +154,8 @@ function decodeSticker(data) {
       case 7:  s.offsetX   = f.value.readFloatLE(0); break;
       case 8:  s.offsetY   = f.value.readFloatLE(0); break;
       case 9:  s.offsetZ   = f.value.readFloatLE(0); break;
-      case 10: s.pattern   = Number(f.value); break;
+      case 10: s.pattern      = Number(f.value); break;
+      case 11: s.highlightReel = Number(f.value); break;
       default: break;
     }
   }
@@ -176,8 +178,9 @@ function encodeItem(item) {
   w.writeUint32(6, item.quality);
 
   // paintwear: float32 reinterpreted as uint32 varint
-  const pwUint32 = float32ToUint32(item.paintWear);
-  w.writeUint32(7, pwUint32);
+  if (item.paintWear != null) {
+    w.writeUint32(7, float32ToUint32(item.paintWear));
+  }
 
   w.writeUint32(8, item.paintSeed);
   w.writeUint32(9, item.killEaterScoreType);
@@ -252,7 +255,7 @@ class InspectLink {
    * @returns {string} uppercase hex string
    */
   static serialize(data) {
-    if (data.paintWear < 0.0 || data.paintWear > 1.0) {
+    if (data.paintWear != null && (data.paintWear < 0.0 || data.paintWear > 1.0)) {
       throw new RangeError(
         `paintwear must be in [0.0, 1.0], got ${data.paintWear}`,
       );

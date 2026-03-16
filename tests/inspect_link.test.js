@@ -404,3 +404,46 @@ describe('serialize — customname validation', () => {
     assert.doesNotThrow(() => InspectLink.serialize(data));
   });
 });
+
+// ---------------------------------------------------------------------------
+// CSFloat/gen.test.ts vectors
+// ---------------------------------------------------------------------------
+
+const CSFLOAT_A = '00180720DA03280638FBEE88F90340B2026BC03C96';
+const CSFLOAT_B = '00180720C80A280638A4E1F5FB03409A0562040800104C62040801104C62040802104C62040803104C6D4F5E30';
+const CSFLOAT_C = 'A2B2A2BA69A882A28AA192AECAA2D2B700A3A5AAA2B286FA7BA0D684BE72';
+
+describe('CSFloat test vectors', () => {
+  test('VectorA: defindex', () => assert.equal(InspectLink.deserialize(CSFLOAT_A).defIndex, 7));
+  test('VectorA: paintindex', () => assert.equal(InspectLink.deserialize(CSFLOAT_A).paintIndex, 474));
+  test('VectorA: paintseed', () => assert.equal(InspectLink.deserialize(CSFLOAT_A).paintSeed, 306));
+  test('VectorA: rarity', () => assert.equal(InspectLink.deserialize(CSFLOAT_A).rarity, 6));
+  test('VectorA: paintwear not null', () => assert.notEqual(InspectLink.deserialize(CSFLOAT_A).paintWear, null));
+  test('VectorA: paintwear approx', () => assert.ok(Math.abs(InspectLink.deserialize(CSFLOAT_A).paintWear - 0.6337) < 0.001));
+
+  test('VectorB: 4 stickers', () => assert.equal(InspectLink.deserialize(CSFLOAT_B).stickers.length, 4));
+  test('VectorB: sticker ids all 76', () => {
+    InspectLink.deserialize(CSFLOAT_B).stickers.forEach(s => assert.equal(s.stickerId, 76));
+  });
+  test('VectorB: paintindex', () => assert.equal(InspectLink.deserialize(CSFLOAT_B).paintIndex, 1352));
+  test('VectorB: paintwear approx 0.99', () => assert.ok(Math.abs(InspectLink.deserialize(CSFLOAT_B).paintWear - 0.99) < 0.01));
+
+  test('VectorC: defindex', () => assert.equal(InspectLink.deserialize(CSFLOAT_C).defIndex, 1355));
+  test('VectorC: quality', () => assert.equal(InspectLink.deserialize(CSFLOAT_C).quality, 12));
+  test('VectorC: keychain count', () => assert.equal(InspectLink.deserialize(CSFLOAT_C).keychains.length, 1));
+  test('VectorC: keychain highlightReel', () => assert.equal(InspectLink.deserialize(CSFLOAT_C).keychains[0].highlightReel, 345));
+  test('VectorC: no paintwear', () => assert.equal(InspectLink.deserialize(CSFLOAT_C).paintWear, null));
+});
+
+describe('Roundtrip: highlight_reel and nullable paintWear', () => {
+  test('highlightReel roundtrip', () => {
+    const data = new ItemPreviewData({ defIndex: 7, keychains: [new Sticker({ slot: 0, stickerId: 36, highlightReel: 345 })] });
+    const result = InspectLink.deserialize(InspectLink.serialize(data));
+    assert.equal(result.keychains[0].highlightReel, 345);
+  });
+  test('null paintWear roundtrip', () => {
+    const data = new ItemPreviewData({ defIndex: 7, paintWear: null });
+    const result = InspectLink.deserialize(InspectLink.serialize(data));
+    assert.equal(result.paintWear, null);
+  });
+});

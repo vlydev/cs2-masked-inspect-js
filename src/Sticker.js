@@ -19,6 +19,7 @@ class Sticker {
    * @param {number|null} [opts.offsetY=null]
    * @param {number|null} [opts.offsetZ=null]
    * @param {number}  [opts.pattern=0]
+   * @param {number|null} [opts.highlightReel=null]
    */
   constructor({
     slot = 0,
@@ -31,6 +32,7 @@ class Sticker {
     offsetY = null,
     offsetZ = null,
     pattern = 0,
+    highlightReel = null,
   } = {}) {
     this.slot = slot;
     this.stickerId = stickerId;
@@ -42,6 +44,7 @@ class Sticker {
     this.offsetY = offsetY;
     this.offsetZ = offsetZ;
     this.pattern = pattern;
+    this.highlightReel = highlightReel;
   }
 }
 
