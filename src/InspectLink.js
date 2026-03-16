@@ -102,8 +102,14 @@ function extractHex(input) {
   const mh = stripped.match(HYBRID_URL_RE);
   if (mh && /[A-Fa-f]/.test(mh[1])) return mh[1];
 
+  // Classic/market URL: A<hex> preceded by %20, space, or + (A is a prefix marker, not hex)
   const m = stripped.match(INSPECT_URL_RE);
   if (m) return m[1];
+
+  // Pure masked format: csgo_econ_action_preview%20<hexblob> (no S/A/M prefix)
+  const mm = stripped.match(/csgo_econ_action_preview(?:%20|\s|\+)([0-9A-Fa-f]{10,})$/i);
+  if (mm) return mm[1];
+
   // Bare hex — strip whitespace
   return stripped.replace(/\s+/g, '');
 }
