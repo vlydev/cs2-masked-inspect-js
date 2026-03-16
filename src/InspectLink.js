@@ -252,6 +252,16 @@ class InspectLink {
    * @returns {string} uppercase hex string
    */
   static serialize(data) {
+    if (data.paintWear < 0.0 || data.paintWear > 1.0) {
+      throw new RangeError(
+        `paintwear must be in [0.0, 1.0], got ${data.paintWear}`,
+      );
+    }
+    if (data.customName != null && data.customName.length > 100) {
+      throw new RangeError(
+        `customname must not exceed 100 characters, got ${data.customName.length}`,
+      );
+    }
     const protoBytes = encodeItem(data);
     const buffer     = Buffer.concat([Buffer.from([0x00]), protoBytes]);
     const checksum   = computeChecksum(buffer, protoBytes.length);
@@ -294,6 +304,11 @@ class InspectLink {
    */
   static deserialize(input) {
     const hex = extractHex(input);
+    if (hex.length > 4096) {
+      throw new RangeError(
+        `Payload too long (max 4096 hex chars): "${input.slice(0, 64)}..."`,
+      );
+    }
     const raw = Buffer.from(hex, 'hex');
 
     if (raw.length < 6) {

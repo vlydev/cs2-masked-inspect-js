@@ -359,3 +359,48 @@ describe('checksum', () => {
     assert.equal(InspectLink.serialize(data), TOOL_HEX);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Defensive validation tests
+// ---------------------------------------------------------------------------
+
+describe('deserialize — payload too long', () => {
+  test('throws RangeError for hex payload exceeding 4096 chars (4098 chars)', () => {
+    const longHex = '00'.repeat(2049); // 4098 hex chars
+    assert.throws(() => InspectLink.deserialize(longHex), RangeError);
+  });
+});
+
+describe('serialize — paintwear validation', () => {
+  test('throws RangeError when paintwear > 1.0', () => {
+    const data = new ItemPreviewData({ paintWear: 1.1 });
+    assert.throws(() => InspectLink.serialize(data), RangeError);
+  });
+
+  test('throws RangeError when paintwear < 0.0', () => {
+    const data = new ItemPreviewData({ paintWear: -0.1 });
+    assert.throws(() => InspectLink.serialize(data), RangeError);
+  });
+
+  test('does not throw when paintwear = 0.0 (boundary)', () => {
+    const data = new ItemPreviewData({ paintWear: 0.0 });
+    assert.doesNotThrow(() => InspectLink.serialize(data));
+  });
+
+  test('does not throw when paintwear = 1.0 (boundary)', () => {
+    const data = new ItemPreviewData({ paintWear: 1.0 });
+    assert.doesNotThrow(() => InspectLink.serialize(data));
+  });
+});
+
+describe('serialize — customname validation', () => {
+  test('throws RangeError when customName is 101 characters', () => {
+    const data = new ItemPreviewData({ customName: 'a'.repeat(101) });
+    assert.throws(() => InspectLink.serialize(data), RangeError);
+  });
+
+  test('does not throw when customName is exactly 100 characters', () => {
+    const data = new ItemPreviewData({ customName: 'a'.repeat(100) });
+    assert.doesNotThrow(() => InspectLink.serialize(data));
+  });
+});

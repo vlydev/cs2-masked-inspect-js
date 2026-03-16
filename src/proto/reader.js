@@ -94,8 +94,12 @@ class ProtoReader {
    */
   readAllFields() {
     const fields = [];
+    let fieldCount = 0;
 
     while (this.remaining() > 0) {
+      if (++fieldCount > 100) {
+        throw new RangeError('Protobuf field count exceeds limit of 100');
+      }
       const [fieldNum, wireType] = this.readTag();
 
       let value;
