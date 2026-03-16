@@ -26,6 +26,6 @@ jobs:
           npm version "$VERSION" --no-git-tag-version
 
       - name: Publish to npm
-        run: |
-          npm config delete //registry.npmjs.org/:_authToken
-          npm publish --access public --provenance
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ""  # clear GitHub token so npm falls back to OIDC trusted publishing
