@@ -12,6 +12,10 @@
     "email": "vladdnepr1989@gmail.com",
     "url": "https://github.com/vlydev"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vlydev/cs2-masked-inspect-js"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
