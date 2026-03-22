@@ -135,6 +135,7 @@ function encodeSticker(s) {
   if (s.offsetZ  !== null) w.writeFloat32Fixed(9, s.offsetZ);
   w.writeUint32(10, s.pattern);
   if (s.highlightReel != null) w.writeUint32(11, s.highlightReel);
+  if (s.paintKit !== null) w.writeUint32(12, s.paintKit);
   return w.toBytes();
 }
 
@@ -156,6 +157,7 @@ function decodeSticker(data) {
       case 9:  s.offsetZ   = f.value.readFloatLE(0); break;
       case 10: s.pattern      = Number(f.value); break;
       case 11: s.highlightReel = Number(f.value); break;
+      case 12: s.paintKit = Number(f.value); break;
       default: break;
     }
   }
