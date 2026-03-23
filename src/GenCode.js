@@ -52,6 +52,9 @@ function serializeStickerPairs(stickers, padTo) {
     for (const s of sorted) {
       result.push(String(s.stickerId));
       result.push(formatFloat(s.wear !== null ? s.wear : 0));
+      if (s.paintKit != null) {
+        result.push(String(s.paintKit));
+      }
     }
   }
 
