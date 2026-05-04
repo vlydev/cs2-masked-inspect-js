@@ -18,6 +18,7 @@
 
 const ItemPreviewData = require('./ItemPreviewData');
 const Sticker         = require('./Sticker');
+const MalformedInspectLinkError = require('./MalformedInspectLinkError');
 const { ProtoReader } = require('./proto/reader');
 const { ProtoWriter } = require('./proto/writer');
 
@@ -310,15 +311,31 @@ class InspectLink {
   static deserialize(input) {
     const hex = extractHex(input);
     if (hex.length > 4096) {
-      throw new RangeError(
-        `Payload too long (max 4096 hex chars): "${input.slice(0, 64)}..."`,
+      throw new MalformedInspectLinkError(
+        `Malformed inspect URL: payload too long (max 4096 hex chars). Input: "${abbreviate(input)}"`,
       );
     }
+
+    // Reject malformed hex BEFORE Buffer.from: Node's hex decoder SILENTLY
+    // truncates odd-length input (returns 1 byte short), letting downstream
+    // proto parse fail with a cryptic native error or — worse — succeed on
+    // garbage. Validate up-front to throw a clean, descriptive error.
+    if (hex.length === 0 || hex.length % 2 !== 0) {
+      throw new MalformedInspectLinkError(
+        `Malformed inspect URL: hex payload has invalid length (${hex.length} chars, must be even and non-empty). The source likely truncated the URL. Input: "${abbreviate(input)}"`,
+      );
+    }
+    if (!/^[0-9A-Fa-f]+$/.test(hex)) {
+      throw new MalformedInspectLinkError(
+        `Malformed inspect URL: payload contains non-hex characters. Input: "${abbreviate(input)}"`,
+      );
+    }
+
     const raw = Buffer.from(hex, 'hex');
 
     if (raw.length < 6) {
-      throw new TypeError(
-        `Payload too short or invalid hex: "${input}"`,
+      throw new MalformedInspectLinkError(
+        `Malformed inspect URL: payload too short (${raw.length} bytes, need >=6). Input: "${abbreviate(input)}"`,
       );
     }
 
@@ -336,8 +353,19 @@ class InspectLink {
 
     // Layout: [key_byte] [proto_bytes] [4-byte checksum]
     const protoBytes = decrypted.slice(1, decrypted.length - 4);
-    return decodeItem(protoBytes);
+    try {
+      return decodeItem(protoBytes);
+    } catch (e) {
+      throw new MalformedInspectLinkError(
+        `Malformed inspect URL: protobuf decode failed (${e && e.message ? e.message : e}). Payload likely corrupted or truncated. Input: "${abbreviate(input)}"`,
+        { cause: e },
+      );
+    }
   }
+}
+
+function abbreviate(s) {
+  return s.length > 120 ? s.slice(0, 100) + '...' : s;
 }
 
 module.exports = InspectLink;
