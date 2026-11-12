@@ -497,3 +497,34 @@ describe('deserialize — malformed URLs (regression)', () => {
     assert.equal(err.name, 'MalformedInspectLinkError');
   });
 });
+
+// ---------------------------------------------------------------------------
+// 10-byte varint (uint64 itemid >= 2^63)
+// ---------------------------------------------------------------------------
+
+describe('uint64 itemid >= 2^63 (10-byte varint)', () => {
+  test('real-world link with top-bit itemid', () => {
+    const item = InspectLink.deserialize(
+      'steam://run/730//+csgo_econ_action_preview%204B5BD7E4B68FF5B880C5B54A53EC6C6BBC41634D7B4873A680CBB1480BAC49A56E6C13',
+    );
+    assert.equal(item.itemId, 18310844006627497884n);
+    assert.equal(BigInt.asIntN(64, item.itemId), -135900067082053732n);
+    assert.equal(item.defIndex, 5031);
+    assert.equal(item.paintIndex, 1399);
+    assert.equal(item.rarity, 6);
+    assert.equal(item.quality, 3);
+  });
+
+  for (const id of [0n, 127n, 128n, 2n ** 63n - 1n, 2n ** 63n, 2n ** 64n - 1n, 18310844006627497884n]) {
+    test(`round-trip itemid ${id}`, () => {
+      const result = roundtrip(new ItemPreviewData({ defIndex: 7, itemId: id }));
+      assert.equal(BigInt(result.itemId), id);
+      assert.equal(result.defIndex, 7);
+    });
+  }
+
+  test('11-byte varint is rejected', () => {
+    const hex = '00' + '10' + 'FF'.repeat(10) + '01' + '00000000';
+    assert.throws(() => InspectLink.deserialize(hex), MalformedInspectLinkError);
+  });
+});

@@ -9,14 +9,14 @@
  * paintwear is stored as a float32 (IEEE 754). On the wire it is reinterpreted
  * as a uint32 — this class always exposes it as a JavaScript number for convenience.
  *
- * accountid and itemid may be large integers; they are stored as BigInt internally
- * but exposed as Number when they fit safely (< 2^53).
+ * itemid is a uint64: it is a Number when it fits safely (<= 2^53 - 1) and a BigInt
+ * otherwise (e.g. ids with the top bit set, which use a 10-byte varint).
  */
 class ItemPreviewData {
   /**
    * @param {object} [opts]
    * @param {number}  [opts.accountId=0]
-   * @param {number}  [opts.itemId=0]
+   * @param {number|bigint}  [opts.itemId=0]
    * @param {number}  [opts.defIndex=0]
    * @param {number}  [opts.paintIndex=0]
    * @param {number}  [opts.rarity=0]

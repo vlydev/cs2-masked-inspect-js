@@ -217,7 +217,7 @@ function decodeItem(data) {
   for (const f of reader.readAllFields()) {
     switch (f.field) {
       case 1:  item.accountId          = Number(f.value); break;
-      case 2:  item.itemId             = Number(f.value); break;
+      case 2:  item.itemId             = f.value <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(f.value) : f.value; break;
       case 3:  item.defIndex           = Number(f.value); break;
       case 4:  item.paintIndex         = Number(f.value); break;
       case 5:  item.rarity             = Number(f.value); break;
